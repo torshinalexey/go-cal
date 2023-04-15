@@ -8,13 +8,20 @@ import (
 
 func main() {
 	today := time.Now()
-	firstDayOfMonth := today.AddDate(0, 0, -today.Day()+1)
+	printHeader(today)
+	printMonth(today)
+}
+
+func printHeader(today time.Time) {
 	weekdays := "Mo Tu We Th Fr Sa Su"
 	fmt.Printf(
 		"%d %s\n%s\n%s\n",
 		today.Year(), today.Month(), weekdays, strings.Repeat("-", len(weekdays)),
 	)
-	for day := firstDayOfMonth; day.Month() == today.Month(); day = day.AddDate(0, 0, 1) {
+}
+
+func printMonth(today time.Time) {
+	for day := today.AddDate(0, 0, -today.Day()+1); day.Month() == today.Month(); day = day.AddDate(0, 0, 1) {
 		if day.AddDate(0, 0, -1).Month() != day.Month() && day.Weekday() != time.Monday {
 			fmt.Print(strings.Repeat("   ", int(day.Weekday())-1))
 		}
