@@ -1,6 +1,8 @@
 # Month Calendar
 This program displays a calendar for the current month in the console.
+
 <img src="screenshot.png" alt="month calendar screenshot" width="300"/>
+
 ### Requirements
 This program requires Go version 1.16 or higher.
 ### Usage
