@@ -32,12 +32,14 @@ func printMonth(w io.Writer, d time.Time) {
 		// Print the day number with an asterisk if it is the current day.
 		if day.Day() == d.Day() {
 			fmt.Fprintf(w, "%.2d*", day.Day())
-			// Print the day number with linebreak if it is Sunday.
-		} else if day.Weekday() == time.Sunday {
-			fmt.Fprintf(w, "%.2d\n", day.Day())
-			// Print the day number with a trailing space.
-		} else {
-			fmt.Fprintf(w, "%.2d ", day.Day())
+			continue
 		}
+		// Print the day number with linebreak if it is Sunday.
+		if day.Weekday() == time.Sunday {
+			fmt.Fprintf(w, "%.2d\n", day.Day())
+			continue
+		}
+		// Print the day number with a trailing space.
+		fmt.Fprintf(w, "%.2d ", day.Day())
 	}
 }
