@@ -1,3 +1,3 @@
-module github.com/torshinalexey/go-date
+module github.com/torshinalexey/go-cal
 
 go 1.19

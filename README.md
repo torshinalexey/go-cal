@@ -20,7 +20,6 @@ This will display a calendar for the current month in the console.
 
 ### Future Improvements
 * Accept command-line arguments for specifying the month and year to display
-* Add unit tests for the code
 
 ### License
 This program is released under the MIT License. See the LICENSE file for details.
