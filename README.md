@@ -13,7 +13,7 @@ go run main.go
 This will display a calendar for the current month in the console.
 ### Features
 * Displays a calendar for the current month
-* Highlights the current date with a colored background
+* Highlights the current date with a an asterisk
 * Automatically adjusts the calendar to start on the first day of the month
 * Wraps the calendar to the next row at the end of each week
 * Prints the calendar in a tabular format with columns for each day of the week
