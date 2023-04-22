@@ -23,23 +23,27 @@ func printHeader(w io.Writer, d time.Time) {
 
 // printMonth prints a calendar month to the given writer for the given date.
 func printMonth(w io.Writer, d time.Time) {
+	var b strings.Builder
+	b.Grow(100)
 	// Iterate over each day in the month.
 	for day := d.AddDate(0, 0, -d.Day()+1); day.Month() == d.Month(); day = day.AddDate(0, 0, 1) {
+		curDay := day.Day()
 		// If this is the first day of the month and it is not a Monday, add padding to align the first week.
 		if day.AddDate(0, 0, -1).Month() != day.Month() && day.Weekday() != time.Monday {
-			fmt.Fprint(w, strings.Repeat("   ", int(day.Weekday())-1))
+			b.WriteString(strings.Repeat("   ", int(day.Weekday())-1))
 		}
 		// Print the day number with an asterisk if it is the current day.
-		if day.Day() == d.Day() {
-			fmt.Fprintf(w, "%.2d*", day.Day())
+		if curDay == d.Day() {
+			b.WriteString(fmt.Sprintf("%.2d*", curDay))
 			continue
 		}
-		// Print the day number with linebreak if it is Sunday.
+		// Print the day number with line break if it is Sunday.
 		if day.Weekday() == time.Sunday {
-			fmt.Fprintf(w, "%.2d\n", day.Day())
+			b.WriteString(fmt.Sprintf("%.2d\n", curDay))
 			continue
 		}
 		// Print the day number with a trailing space.
-		fmt.Fprintf(w, "%.2d ", day.Day())
+		b.WriteString(fmt.Sprintf("%.2d ", curDay))
 	}
+	fmt.Fprint(w, b.String())
 }
