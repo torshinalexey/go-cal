@@ -14,6 +14,8 @@ func main() {
 	printMonth(os.Stdout, today)
 }
 
+// printHeader prints a line with the year, month, and abbreviated weekday names,
+// followed by a line of dashes with the same length as the weekday names.
 func printHeader(w io.Writer, d time.Time) {
 	weekdays := "Mo Tu We Th Fr Sa Su"
 	fmt.Fprintf(w, "%d %s\n%s\n%s\n",
@@ -23,27 +25,34 @@ func printHeader(w io.Writer, d time.Time) {
 
 // printMonth prints a calendar month to the given writer for the given date.
 func printMonth(w io.Writer, d time.Time) {
-	var b strings.Builder
-	b.Grow(100)
-	// Iterate over each day in the month.
+	var monthRepr strings.Builder
+	monthRepr.Grow(100)
 	for day := d.AddDate(0, 0, -d.Day()+1); day.Month() == d.Month(); day = day.AddDate(0, 0, 1) {
-		curDay := day.Day()
-		// If this is the first day of the month and it is not a Monday, add padding to align the first week.
-		if day.AddDate(0, 0, -1).Month() != day.Month() && day.Weekday() != time.Monday {
-			b.WriteString(strings.Repeat("   ", int(day.Weekday())-1))
+		dayOfMonth := day.Day()
+		weekday := day.Weekday()
+		if day.AddDate(0, 0, -1).Month() != day.Month() &&
+			weekday != time.Monday {
+			n := int(weekday) - 1
+			if n < 0 {
+				n = 6
+			}
+			monthRepr.WriteString(strings.Repeat("   ", n))
 		}
-		// Print the day number with an asterisk if it is the current day.
-		if curDay == d.Day() {
-			b.WriteString(fmt.Sprintf("%.2d*", curDay))
-			continue
+		var dayRepr strings.Builder
+		dayRepr.Grow(3)
+		dayRepr.WriteString(fmt.Sprintf("%.2d", dayOfMonth))
+		switch {
+		case dayOfMonth == d.Day() && weekday == time.Sunday:
+			dayRepr.WriteString("*\n")
+		case dayOfMonth == d.Day():
+			dayRepr.WriteString("*")
+		case weekday == time.Sunday,
+			day.AddDate(0, 0, 1).Month() != day.Month():
+			dayRepr.WriteRune('\n')
+		default:
+			dayRepr.WriteRune(' ')
 		}
-		// Print the day number with line break if it is Sunday.
-		if day.Weekday() == time.Sunday {
-			b.WriteString(fmt.Sprintf("%.2d\n", curDay))
-			continue
-		}
-		// Print the day number with a trailing space.
-		b.WriteString(fmt.Sprintf("%.2d ", curDay))
+		monthRepr.WriteString(dayRepr.String())
 	}
-	fmt.Fprint(w, b.String())
+	fmt.Fprint(w, monthRepr.String())
 }
