@@ -2,39 +2,40 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 	"time"
 )
 
 func main() {
 	today := time.Now()
-	printHeader(today)
-	printMonth(today)
+	printHeader(os.Stdout, today)
+	printMonth(os.Stdout, today)
 }
 
-func printHeader(today time.Time) {
+func printHeader(w io.Writer, d time.Time) {
 	weekdays := "Mo Tu We Th Fr Sa Su"
-	fmt.Printf(
-		"%d %s\n%s\n%s\n",
-		today.Year(), today.Month(), weekdays, strings.Repeat("-", len(weekdays)),
+	fmt.Fprintf(w, "%d %s\n%s\n%s\n",
+		d.Year(), d.Month(), weekdays, strings.Repeat("-", len(weekdays)),
 	)
 }
 
-func printMonth(today time.Time) {
-	for day := today.AddDate(0, 0, -today.Day()+1); day.Month() == today.Month(); day = day.AddDate(0, 0, 1) {
+// printMonth prints a calendar month to the given writer for the given date.
+func printMonth(w io.Writer, d time.Time) {
+	// Iterate over each day in the month.
+	for day := d.AddDate(0, 0, -d.Day()+1); day.Month() == d.Month(); day = day.AddDate(0, 0, 1) {
+		// If this is the first day of the month and it is not a Monday, add padding to align the first week.
 		if day.AddDate(0, 0, -1).Month() != day.Month() && day.Weekday() != time.Monday {
-			fmt.Print(strings.Repeat("   ", int(day.Weekday())-1))
+			fmt.Fprint(w, strings.Repeat("   ", int(day.Weekday())-1))
 		}
-		if day.Day() == today.Day() {
-			fmt.Printf("\033[46m%.2d\033[0m ", day.Day())
+		// Print the day number with a trailing space or asterisk if it is the current day.
+		if day.Day() == d.Day() {
+			fmt.Fprintf(w, "%.2d*", day.Day())
+		} else if day.Weekday() == time.Sunday {
+			fmt.Fprintf(w, "%.2d\n", day.Day())
 		} else {
-			fmt.Printf("%.2d ", day.Day())
-		}
-		if day.Weekday() == time.Sunday {
-			fmt.Println()
-		}
-		if day.AddDate(0, 0, 1).Month() != day.Month() && day.Weekday() != time.Sunday {
-			fmt.Println(strings.Repeat("   ", 7-int(day.Weekday())))
+			fmt.Fprintf(w, "%.2d ", day.Day())
 		}
 	}
 }
