@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -23,36 +24,47 @@ func printHeader(w io.Writer, d time.Time) {
 	)
 }
 
-// printMonth prints a calendar month to the given writer for the given date.
-func printMonth(w io.Writer, d time.Time) {
-	var monthRepr strings.Builder
-	monthRepr.Grow(100)
-	for day := d.AddDate(0, 0, -d.Day()+1); day.Month() == d.Month(); day = day.AddDate(0, 0, 1) {
-		dayOfMonth := day.Day()
-		weekday := day.Weekday()
-		if day.AddDate(0, 0, -1).Month() != day.Month() &&
-			weekday != time.Monday {
-			n := int(weekday) - 1
-			if n < 0 {
-				n = 6
-			}
-			monthRepr.WriteString(strings.Repeat("   ", n))
+func printMonth(w io.Writer, target time.Time) {
+	firstDayOfMonthWeekday := target.AddDate(0, 0, -target.Day()+1).Weekday()
+	lastDayOfMonth := target.AddDate(0, 1, -target.Day())
+	var monthBuilder strings.Builder
+	monthBuilder.Grow(100)
+	if firstDayOfMonthWeekday != time.Monday {
+		wDay := firstDayOfMonthWeekday
+		if wDay == time.Sunday {
+			wDay = 7
 		}
-		var dayRepr strings.Builder
-		dayRepr.Grow(3)
-		dayRepr.WriteString(fmt.Sprintf("%.2d", dayOfMonth))
-		switch {
-		case dayOfMonth == d.Day() && weekday == time.Sunday:
-			dayRepr.WriteString("*\n")
-		case dayOfMonth == d.Day():
-			dayRepr.WriteString("*")
-		case weekday == time.Sunday,
-			day.AddDate(0, 0, 1).Month() != day.Month():
-			dayRepr.WriteRune('\n')
-		default:
-			dayRepr.WriteRune(' ')
+		for i := 0; i < (int(wDay)-1)*3; i++ {
+			monthBuilder.WriteRune(' ')
 		}
-		monthRepr.WriteString(dayRepr.String())
 	}
-	fmt.Fprint(w, monthRepr.String())
+	curWeekDay := firstDayOfMonthWeekday
+	for day := 1; day <= lastDayOfMonth.Day(); day++ {
+		if day < 10 {
+			monthBuilder.WriteRune('0')
+		}
+		monthBuilder.WriteString(strconv.Itoa(day))
+
+		switch {
+		case day == target.Day() &&
+			curWeekDay == time.Sunday:
+			monthBuilder.WriteRune('*')
+			monthBuilder.WriteRune('\n')
+		case day == target.Day():
+			monthBuilder.WriteRune('*')
+		case day != target.Day() &&
+			curWeekDay != time.Sunday &&
+			day != lastDayOfMonth.Day():
+			monthBuilder.WriteRune(' ')
+		case curWeekDay == time.Sunday:
+			monthBuilder.WriteRune('\n')
+		}
+		if curWeekDay == time.Saturday {
+			curWeekDay = time.Sunday
+			continue
+		}
+		curWeekDay++
+	}
+	monthBuilder.WriteRune('\n')
+	w.Write([]byte(monthBuilder.String()))
 }
