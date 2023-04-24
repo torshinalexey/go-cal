@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -66,5 +67,7 @@ func printMonth(w io.Writer, target time.Time) {
 		curWeekDay++
 	}
 	monthBuilder.WriteRune('\n')
-	w.Write([]byte(monthBuilder.String()))
+	if _, err := w.Write([]byte(monthBuilder.String())); err != nil {
+		log.Fatal(err)
+	}
 }
