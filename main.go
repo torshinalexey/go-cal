@@ -45,20 +45,14 @@ func printMonth(w io.Writer, target time.Time) {
 			monthBuilder.WriteRune('0')
 		}
 		monthBuilder.WriteString(strconv.Itoa(day))
-
-		switch {
-		case day == target.Day() &&
-			curWeekDay == time.Sunday:
+		if day == target.Day() {
 			monthBuilder.WriteRune('*')
+		}
+		if curWeekDay == time.Sunday ||
+			day == lastDayOfMonth.Day() {
 			monthBuilder.WriteRune('\n')
-		case day == target.Day():
-			monthBuilder.WriteRune('*')
-		case day != target.Day() &&
-			curWeekDay != time.Sunday &&
-			day != lastDayOfMonth.Day():
+		} else if day != target.Day() {
 			monthBuilder.WriteRune(' ')
-		case curWeekDay == time.Sunday:
-			monthBuilder.WriteRune('\n')
 		}
 		if curWeekDay == time.Saturday {
 			curWeekDay = time.Sunday
@@ -66,7 +60,7 @@ func printMonth(w io.Writer, target time.Time) {
 		}
 		curWeekDay++
 	}
-	monthBuilder.WriteRune('\n')
+	// monthBuilder.WriteRune('\n')
 	if _, err := w.Write([]byte(monthBuilder.String())); err != nil {
 		log.Fatal(err)
 	}
